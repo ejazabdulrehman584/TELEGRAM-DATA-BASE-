@@ -23,6 +23,8 @@ services:
       - key: BOT_USERNAME
         value: cloud_computings_bot
       - key: DEVELOPER
-        value: "@cloud_computings_bot"
+        value: "@OSINT_CLONER"
+      - key: CHANNEL
+        value: "@premiumscriptsbackup"
       - key: MASTER_KEY
         generateValue: true

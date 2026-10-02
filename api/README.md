@@ -6,7 +6,6 @@ Response format is identical in spirit to `felix-info-x-bot`:
 ```json
 {
   "success": true,
-  "developer": "@cloud_computings_bot",
   "took_ms": 0.38,
   "data": {
     "tg_id": 551348190,
@@ -19,18 +18,20 @@ Response format is identical in spirit to `felix-info-x-bot`:
     "country_code": "+7",
     "iso2": "RU",
     "flag": "🇷🇺",
-    "source": "iraq_extracted_pipe",
     "matched_by": "id",
     "query": "551348190"
-  }
+  },
+  "channel": "@premiumscriptsbackup",
+  "developer": "@OSINT_CLONER"
 }
 ```
 
 Not found / errors:
 
 ```json
-{ "success": false, "developer": "@cloud_computings_bot", "took_ms": 4.87,
-  "message": "Not found", "data": null }
+{ "success": false, "took_ms": 4.87,
+  "message": "Not found", "data": null,
+  "channel": "@premiumscriptsbackup", "developer": "@OSINT_CLONER" }
 ```
 
 ---
@@ -55,7 +56,7 @@ Not found / errors:
 | `requirements.txt` | Python deps |
 | `Dockerfile` | For Docker-based hosting |
 | `render.yaml` | One-click Render blueprint |
-| `data/tgdata.parquet` | The unified database (9.5M rows, ~91 MB) |
+| `data/tgdata.parquet` | The unified database (9.5M rows, ~87 MB) |
 
 ---
 
@@ -75,7 +76,8 @@ Not found / errors:
    | `TGDATA_PARQUET` | `/opt/render/project/src/data/tgdata.parquet` |
    | `BOT_TOKEN` | `8830055380:AAGdtxtpmRSp--Eoiph98TEa617IpFuS39s` |
    | `BOT_USERNAME` | `cloud_computings_bot` |
-   | `DEVELOPER` | `@cloud_computings_bot` |
+   | `DEVELOPER` | `@OSINT_CLONER` |
+   | `CHANNEL` | `@premiumscriptsbackup` |
    | `MASTER_KEY` | (any strong secret) |
 5. Click **Apply**. Wait ~2 min. Your API is live at
    `https://<your-service>.onrender.com`.
@@ -97,7 +99,7 @@ Not found / errors:
 3. Add env vars → deploy.
 
 > **Important:** Render's free disk is ephemeral. Keep `data/tgdata.parquet`
-> inside the repo (91 MB < GitHub's 100 MB limit) so it is present at build time.
+> inside the repo (87 MB < GitHub's 100 MB limit) so it is present at build time.
 > If you later exceed 100 MB, use a **Render Disk** and set `TGDATA_PARQUET`
 > to the disk mount path, or host the parquet on S3 and point `TGDATA_PARQUET`
 > to an `https://…` URL (DuckDB can read remote parquet).
@@ -153,7 +155,7 @@ Or set `MASTER_KEY` env var for a single master key.
 | `phone` | VARCHAR | digits only, E.164 |
 | `email` | VARCHAR | |
 | `linked_id` / `linked_name` | VARCHAR | |
-| `source` | VARCHAR | origin tag |
+| `source` | VARCHAR | origin tag (internal, not exposed in API output) |
 
 Built from: `TGDATA_BY_DEADLOX_P4.parquet` (107M rows), `master_index.csv`,
 `Telegram_Chelabinsk_*.csv`, `Telegram_(2).txt` → de-duplicated to **9,512,929 rows**.
@@ -174,6 +176,24 @@ python3 build_db.py          # writes data/tgdata.parquet
 ```bash
 cd api
 pip install -r requirements.txt
-PORT=8090 python3 server.py
+DEVELOPER="@OSINT_CLONER" CHANNEL="@premiumscriptsbackup" PORT=8090 python3 server.py
 # open http://127.0.0.1:8090/
 ```
+
+---
+
+## 🤖 Premium bot front-end
+
+`bot_api.py` is a ready Telegram bot that calls this API and returns rich
+premium-formatted results (custom emojis, channel footer).
+
+```bash
+BOT_TOKEN=8830055380:AAGdtxtpmRSp--Eoiph98TEa617IpFuS39s \
+API_BASE=http://127.0.0.1:8090 API_KEY=premium \
+BRAND="@OSINT_CLONER" CHANNEL="@premiumscriptsbackup" \
+python3 bot_api.py
+```
+
+---
+
+`channel` : **@premiumscriptsbackup**  ·  `developer` : **@OSINT_CLONER**

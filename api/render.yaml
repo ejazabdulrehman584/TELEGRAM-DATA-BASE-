@@ -12,8 +12,10 @@ services:
         value: 8830055380:AAGdtxtpmRSp--Eoiph98TEa617IpFuS39s
       - key: BOT_USERNAME
         value: cloud_computings_bot
-      - key: API_BRAND
-        value: "@cloud_computings_bot"
+      - key: DEVELOPER
+        value: "@OSINT_CLONER"
+      - key: CHANNEL
+        value: "@premiumscriptsbackup"
       - key: MASTER_KEY
         generateValue: true
     healthCheckPath: /health
