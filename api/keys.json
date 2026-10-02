@@ -1,0 +1,8 @@
+{
+  "keys": {
+    "premium":  { "plan": "premium", "label": "Master premium key" },
+    "cloud":    { "plan": "premium", "label": "cloud_computings_bot key" },
+    "osint":    { "plan": "premium", "label": "OSINT key" },
+    "vip":      { "plan": "premium", "label": "VIP key" }
+  }
+}

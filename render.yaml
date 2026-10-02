@@ -1,0 +1,28 @@
+# Render Blueprint — Premium Telegram OSINT API
+# Repo layout expected:
+#   render.yaml            (this file, at repo root)
+#   api/                   (server.py, country.py, keys.json, requirements.txt, Dockerfile)
+#   data/tgdata.parquet    (the unified database, ~91 MB)
+services:
+  - type: web
+    name: tg-osint-api
+    runtime: python
+    plan: starter            # free works too, but cold-starts; starter = always on
+    rootDir: api
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: TGDATA_PARQUET
+        value: /opt/render/project/src/data/tgdata.parquet
+      - key: BOT_TOKEN
+        value: 8830055380:AAGdtxtpmRSp--Eoiph98TEa617IpFuS39s
+      - key: BOT_USERNAME
+        value: cloud_computings_bot
+      - key: DEVELOPER
+        value: "@cloud_computings_bot"
+      - key: MASTER_KEY
+        generateValue: true
