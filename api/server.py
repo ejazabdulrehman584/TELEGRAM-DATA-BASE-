@@ -39,6 +39,7 @@ import json
 import os
 import threading
 import time
+from datetime import datetime, timezone
 from typing import Optional
 
 import duckdb
@@ -172,15 +173,50 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"],
                    allow_headers=["*"])
 
 
-def _key_ok(key: Optional[str]):
+def _parse_expiry(v):
+    """Accept epoch seconds (int/float/numeric str) OR ISO-8601 string.
+    Returns epoch seconds (float) or None if no/!invalid expiry."""
+    if v is None:
+        return None
+    if isinstance(v, (int, float)):
+        return float(v)
+    s = str(v).strip()
+    if not s:
+        return None
+    try:
+        return float(s)
+    except ValueError:
+        pass
+    try:
+        if s.endswith("Z"):
+            s = s[:-1] + "+00:00"
+        dt = datetime.fromisoformat(s)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.timestamp()
+    except Exception:
+        return None
+
+
+def _key_check(key: Optional[str]):
+    """Return (ok: bool, reason: str). Handles optional per-key expiry."""
     if not key:
-        return False
+        return False, "Access denied: invalid API key"
     k = str(key).strip()
-    if k in KEYS.get("keys", {}):
-        return True
     if MASTER_KEY and k == MASTER_KEY:
-        return True
-    return False
+        return True, ""
+    info = KEYS.get("keys", {}).get(k)
+    if info is None:
+        return False, "Access denied: invalid API key"
+    if isinstance(info, dict):
+        exp = _parse_expiry(info.get("expires_at"))
+        if exp is not None and time.time() > exp:
+            return False, "Access denied: API key expired"
+    return True, ""
+
+
+def _key_ok(key: Optional[str]):
+    return _key_check(key)[0]
 
 
 def _resp(success: bool, data, took: float, message: Optional[str] = None):
@@ -196,8 +232,9 @@ def _resp(success: bool, data, took: float, message: Optional[str] = None):
 
 
 def _do(key, tg):
-    if not _key_ok(key):
-        return _resp(False, None, 0.0, "Access denied: invalid API key")
+    ok, reason = _key_check(key)
+    if not ok:
+        return _resp(False, None, 0.0, reason)
     if not tg:
         return _resp(False, None, 0.0, "Missing 'tg'. Use /key=KEY&tg=<id|@username|+phone>")
     t0 = time.time()

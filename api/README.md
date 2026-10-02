@@ -143,6 +143,38 @@ Edit `keys.json`:
 
 Or set `MASTER_KEY` env var for a single master key.
 
+### ⏳ Auto-expiring keys (time-limited)
+
+Any key may carry an `expires_at` (ISO-8601 UTC **or** epoch seconds).
+After that moment the server automatically rejects it with
+`"Access denied: API key expired"` — no restart needed.
+
+```json
+{
+  "keys": {
+    "trial10": {
+      "plan": "trial",
+      "created_at": "2026-10-02T05:57:31+00:00",
+      "expires_at": "2026-10-12T05:57:31+00:00",
+      "days": 10
+    }
+  }
+}
+```
+
+Use the bundled generator to create / list / revoke keys:
+
+```bash
+cd api
+python3 gen_key.py --days 10 --name trial10     # new key valid 10 days
+python3 gen_key.py --days 30 --name vip30 --plan premium
+python3 gen_key.py --list                        # show keys + days left
+python3 gen_key.py --revoke trial10              # delete a key
+```
+
+> **Current live key:** `trial10` — valid until **2026-10-12 05:57 UTC** (10 days).
+
+
 ---
 
 ## 🗄️ Database schema (`data/tgdata.parquet`)
