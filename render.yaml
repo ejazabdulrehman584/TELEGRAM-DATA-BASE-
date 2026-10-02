@@ -26,5 +26,7 @@ services:
         value: "@OSINT_CLONER"
       - key: CHANNEL
         value: "@premiumscriptsbackup"
+      - key: DUCKDB_MEM
+        value: "400MB"          # safe on Free (512MB); raise to 1500MB on Starter
       - key: MASTER_KEY
         generateValue: true

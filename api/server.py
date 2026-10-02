@@ -82,8 +82,10 @@ KEYS = _load_keys()
 # --------------------------------------------------------------------------- db
 _lock = threading.Lock()
 _con = duckdb.connect()
-_con.execute("PRAGMA threads=2")
-_con.execute("PRAGMA memory_limit='1800MB'")
+_DB_THREADS = int(os.environ.get("DUCKDB_THREADS", "2"))
+_DB_MEM = os.environ.get("DUCKDB_MEM", "1800MB")
+_con.execute(f"PRAGMA threads={_DB_THREADS}")
+_con.execute(f"PRAGMA memory_limit='{_DB_MEM}'")
 _SRC = f"read_parquet('{PARQUET}')"
 
 
