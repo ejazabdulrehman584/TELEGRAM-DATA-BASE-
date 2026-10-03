@@ -7,7 +7,7 @@ services:
   - type: web
     name: tg-osint-api
     runtime: python
-    plan: starter            # free works too, but cold-starts; starter = always on
+    plan: free            # free works too, but cold-starts; starter = always on
     rootDir: api
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT
@@ -30,3 +30,4 @@ services:
         value: "400MB"          # safe on Free (512MB); raise to 1500MB on Starter
       - key: MASTER_KEY
         generateValue: true
+
